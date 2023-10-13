@@ -26,4 +26,14 @@ class HelperClass {
     }
     return buffer.toString();
   }
+
+  static int countDigits(int number) {
+    int digits = 0;
+    if (number < 0) number *= -1;
+    while (number != 0) {
+      number = number ~/ 10;
+      digits++;
+    }
+    return digits;
+  }
 }

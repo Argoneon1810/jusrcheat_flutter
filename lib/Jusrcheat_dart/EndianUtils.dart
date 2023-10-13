@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:typed_data';
+import 'package:jusrcheat_flutter/HelperClass.dart';
 import 'package:jusrcheat_flutter/Logger.dart';
 
 class EndianUtils {
@@ -30,9 +32,13 @@ class EndianUtils {
       b = Uint8List(s.length + 1);
     }
 
-    for(int i = 0; i < b.length; i++) {
-      b[i] = i < s.length ? s.codeUnitAt(i) : 0;
-    }
+    HelperClass.copyList(
+        readFrom: utf8.encode(s),
+        writeTo: b,
+        readStartingIndex: 0,
+        writeStartingIndex: 0,
+        length: b.length
+    );
     return b;
   }
   static Uint8List str2byte_2(String s1, String s2, bool padding) {

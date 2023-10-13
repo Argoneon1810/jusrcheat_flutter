@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:jusrcheat_flutter/Logger.dart';
@@ -41,21 +42,23 @@ class R4Folder implements R4Item {
     // Unknown what this is
     oneHot = (flags&0x0100)==0x0100;
 
-    StringBuffer sb = StringBuffer();
-    int tempChar;
-    while((tempChar = bb.readByte()) != 0) {
-      sb.write(String.fromCharCode(tempChar));
+    Utf8Decoder decoder = const Utf8Decoder(allowMalformed: true);
+    List<int> encodedText = List.empty(growable: true);
+    int tempCharCode, readByteCount = 0;
+    while((tempCharCode = bb.readByte()) != 0) {
+      encodedText.add(tempCharCode);
+      readByteCount++;
     }
-    _foldName = sb.toString();
-    sb.clear();
+    _foldName = decoder.convert(encodedText);
 
-    while((tempChar = bb.readByte()) != 0) {
-      sb.write(String.fromCharCode(tempChar));
+    encodedText.clear();
+    while((tempCharCode = bb.readByte()) != 0) {
+      encodedText.add(tempCharCode);
+      readByteCount++;
     }
-    _foldDesc = sb.toString();
-    sb.clear();
+    _foldDesc = decoder.convert(encodedText);
 
-    bb.skip(EndianUtils.alignto4(_foldName.length + _foldDesc.length + 2));
+    bb.skip(EndianUtils.alignto4(readByteCount + 2));
 
     Uint8List tempArr = Uint8List(2);
     for(int i = 0; i<this.numCodes; i++) {

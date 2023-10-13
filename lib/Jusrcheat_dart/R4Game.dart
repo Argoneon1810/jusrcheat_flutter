@@ -35,16 +35,17 @@ class R4Game {
     ByteBuffer bb = ByteBuffer(data: data);
     bb.skip(gamePointer.pointer);
 
-    StringBuffer sb = StringBuffer();
-    int tempCharCode;
+    Utf8Decoder decoder = const Utf8Decoder(allowMalformed: true);
+    List<int> encodedText = List.empty(growable: true);
+    int tempCharCode, readByteCount = 0;
     while((tempCharCode = bb.readByte()) != 0) {
-      sb.write(String.fromCharCode(tempCharCode));
+      encodedText.add(tempCharCode);
+      readByteCount++;
     }
-    gameTitle = sb.toString();
-    sb.clear();
+    gameTitle = decoder.convert(encodedText);
 
     // Align to nearest multiple of 4
-    bb.skip(EndianUtils.alignto4(gameTitle.length + 1));
+    bb.skip(EndianUtils.alignto4(readByteCount + 1));
 
     // Get number of codes/folders
     Uint8List tempArr = Uint8List(2);

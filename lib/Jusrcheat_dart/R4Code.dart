@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:jusrcheat_flutter/HelperClass.dart';
@@ -32,21 +33,23 @@ class R4Code implements R4Item{
     codeEnabled = (flags & 0x0100) == 0x0100;
     _codes = List<int>.empty(growable: true);
 
-    StringBuffer sb = StringBuffer();
-    int tempCharCode;
+    Utf8Decoder decoder = const Utf8Decoder(allowMalformed: true);
+    List<int> encodedText = List.empty(growable: true);
+    int tempCharCode, readByteCount = 0;
     while((tempCharCode = bb.readByte()) != 0) {
-      sb.write(String.fromCharCode(tempCharCode));
+      encodedText.add(tempCharCode);
+      readByteCount++;
     }
-    _codeName = sb.toString();
-    sb.clear();
+    _codeName = decoder.convert(encodedText);
 
+    encodedText.clear();
     while((tempCharCode = bb.readByte()) != 0) {
-      sb.write(String.fromCharCode(tempCharCode));
+      encodedText.add(tempCharCode);
+      readByteCount++;
     }
-    _codeDesc = sb.toString();
-    sb.clear();
+    _codeDesc = decoder.convert(encodedText);
 
-    bb.skip(EndianUtils.alignto4(_codeName.length + _codeDesc.length + 2));
+    bb.skip(EndianUtils.alignto4(readByteCount + 2));
 
     Uint8List tempArr = Uint8List(4);
     bb.read(tempArr);
